@@ -1,9 +1,9 @@
 package sudoku.model.concrete;
 
+import sudoku.model.NotableCell;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import sudoku.model.NotableCell;
 
 public class SudokuCell implements sudoku.model.Cell<Integer>, NotableCell<Integer> {
 	public static final int DEFAULT_GRID_SIZE = 9;
