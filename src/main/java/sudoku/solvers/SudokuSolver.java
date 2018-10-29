@@ -1,23 +1,11 @@
 package sudoku.solvers;
 
-import sudoku.model.concrete.SudokuGrid;
+import sudoku.model.SudokuGrid;
 
-public class SudokuSolver {
-	
-	private SudokuGrid grid;
-	
-	public SudokuSolver(SudokuGrid grid) {
-		this.grid = grid;
-	}
-	
-	public static SudokuSolver solve(SudokuGrid sudokuGrid) {
-		SudokuSolver solver = new SudokuSolver(sudokuGrid);
-		solver.solve();
-		return solver;
-	}
-	
-	
-	
-	public void solve() {
-	}
+import java.util.stream.Stream;
+
+public interface SudokuSolver {
+    SudokuGrid solve(SudokuGrid grid);
+
+    Stream<SudokuMove> playthrough(SudokuGrid grid);
 }
