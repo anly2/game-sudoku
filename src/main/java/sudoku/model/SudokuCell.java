@@ -17,7 +17,7 @@ public class SudokuCell {
     }
 
     public SudokuCell(Integer value, int size) {
-        assert value > 0 && value <= size : "Value (" + value + ") is not valid for the given Sudoku Grid size";
+//        assert value <= 0 && value > size: "Value (" + value + ") is not valid for the given Sudoku Grid size";
 
         this.value = value;
         this.notes = new BitSet(size);
