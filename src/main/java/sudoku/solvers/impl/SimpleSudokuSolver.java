@@ -26,7 +26,15 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
         notePotential(grid, plan);
 
-        return Stream.of(new SudokuMove(0, 1, 2, true));
+        while (true) {
+            if (markHoles(grid, plan)) {
+                continue;
+            }
+
+            break;
+        }
+
+        return plan.build();
     }
 
     protected void apply(SudokuGrid grid, Stream<SudokuMove> playthrough) {
@@ -50,8 +58,46 @@ public class SimpleSudokuSolver implements SudokuSolver {
         });
     }
 
+
+    protected boolean markHoles(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
+        boolean[] hasChanged = {false};
+
+        grid.forEach((y, x) -> cell -> {
+            if (cell.isEmpty()) {
+                if (cell.notesSize() == 1) {
+                    int v = cell.getNotes().findFirst()
+                            .orElseThrow(() -> new IllegalStateException("Notes size lied"));
+                    mark(grid, plan, y, x, cell, v);
+                    hasChanged[0] = true;
+                }
+            }
+        });
+
+        return hasChanged[0];
+    }
+
+    private void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, Integer row, Integer col, SudokuCell cell, int v) {
+        cell.set(v);
+        plan.accept(expressMarking(row, col, v));
+        grid.getSeen(row, col)
+                .filter(c -> c.hasNote(v))
+                .forEach(c -> {
+                    c.clearNote(v);
+                    plan.accept(expressImpossibility(row, col, v));
+                });
+    }
+
+
+    protected SudokuMove expressMarking(Integer row, Integer col, Integer value) {
+        return new SudokuMove(row, col, value, false);
+    }
+
     protected SudokuMove expressPotential(Integer row, Integer col, Integer value) {
         return new SudokuMove(row, col, value, true);
+    }
+
+    protected SudokuMove expressImpossibility(Integer row, Integer col, Integer value) {
+        return new SudokuMove(row, col, -value, true);
     }
 
 
@@ -93,74 +139,6 @@ public class SimpleSudokuSolver implements SudokuSolver {
         express.victory();
     }
 
-
-    public void markInitial() {
-        for (Cell cell : grid)
-            if (cell.isSet())
-                express.initial(cell);
-    }
-
-
-    public void notePotential() {
-        grid.
-    }
-
-    public void notePotential(int value) {
-
-        /*
-         * - Optimized -
-         *
-         * Could easily be:
-         * <code>
-         * 	for (Cell cell : grid.cells)
-         * 		if (!cell.sees(value))
-         * 			cell.note(value);
-         * </code>
-         //
-
-        for (int n = 0; n < 9; n++) {
-            Cells reg = grid.getReg(n);
-
-            if (reg.contains(value))
-                continue;
-
-            for (Cell cell : reg) {
-                if (cell.isSet())
-                    continue;
-
-                //If the cell sees the value
-                if (grid.getSeen(cell, false).contains(value))
-                    continue;
-
-                cell.note(value);
-                express.note(cell, value);
-            }
-        }
-    }
-
-    public boolean markHoles() {
-        boolean hasChanged = false;
-
-        for (Cell cell : grid) {
-            if (cell.isSet())
-                continue;
-
-            ArrayList<Integer> noted = cell.getNoted();
-
-            if (noted.size() > 1)
-                continue;
-
-            if (noted.size() == 0)
-                throw new Inconsistency();
-
-            int v = noted.get(0);
-            mark(cell, v);
-            express.hole(cell, v);
-            hasChanged = true;
-        }
-
-        return hasChanged;
-    }
 
     public boolean markLoners() {
         boolean hasChanged = false;

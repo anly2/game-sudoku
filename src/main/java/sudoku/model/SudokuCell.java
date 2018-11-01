@@ -1,6 +1,7 @@
 package sudoku.model;
 
 import java.util.BitSet;
+import java.util.stream.IntStream;
 
 public class SudokuCell {
 
@@ -55,5 +56,9 @@ public class SudokuCell {
 
     public int notesSize() {
         return notes.cardinality();
+    }
+
+    public IntStream getNotes() {
+        return notes.stream();
     }
 }
