@@ -42,27 +42,85 @@ public class SudokuGrid extends SquareGrid<SudokuCell> {
         IntStream.rangeClosed(1, getWidth()).boxed().forEach(consumer);
     }
 
-    public Stream<SudokuCell> getTile(int row, int column) {
-        int i = Math.floorDiv(row, tileSize);
-        int j = Math.floorDiv(column, tileSize);
-        return IntStream.range(i, i + tileSize).boxed()
-                .flatMap(y -> IntStream.range(j, j + tileSize)
-                        .mapToObj(x -> getCell(y, x)));
+    public void foreachTile(GridConsumer consumer) {
+        for (int row = 0; row < tileSize; row++) {
+            for (int col = 0; col < tileSize; col++) {
+                consumer.accept(row * tileSize, col * tileSize);
+            }
+        }
     }
 
-    public Stream<SudokuCell> getRow(int row) {
-        return IntStream.range(0, getWidth())
-                .mapToObj(col -> getCell(row, col));
+    public void foreachCellInTile(int y, int x, CellConsumer consumer) {
+        foreachCellInTile(y, x, gridConsumer(consumer));
     }
 
-    public Stream<SudokuCell> getColumn(int column) {
-        return IntStream.range(0, getHeight())
-                .mapToObj(row -> getCell(row, column));
+    public void foreachCellInTile(int y, int x, GridConsumer consumer) {
+        int i = Math.floorDiv(y, tileSize);
+        int j = Math.floorDiv(x, tileSize);
+
+        for (int row = 0; row < tileSize; row++) {
+            for (int col = 0; col < tileSize; col++) {
+                consumer.accept(i + row, j + col);
+            }
+        }
     }
 
-    public Stream<SudokuCell> getSeen(int row, int column) {
-        return Stream.of(getTile(row, column), getRow(row), getColumn(column))
-                .flatMap(s -> s);
+
+    public void foreachCellInRow(int row, CellConsumer consumer) {
+        foreachCellInRow(row, gridConsumer(consumer));
+    }
+
+    public void foreachCellInRow(int row, GridConsumer consumer) {
+        for (int col = 0; col < getWidth(); col++) {
+            consumer.accept(row, col);
+        }
+    }
+
+
+    public void foreachCellInColumn(int col, CellConsumer consumer) {
+        foreachCellInColumn(col, gridConsumer(consumer));
+    }
+
+    public void foreachCellInColumn(int col, GridConsumer consumer) {
+        for (int row = 0; row < getHeight(); row++) {
+            consumer.accept(row, col);
+        }
+    }
+
+
+    public void foreachSeen(int row, int col, CellConsumer consumer) {
+        foreachSeen(row, col, gridConsumer(consumer));
+    }
+
+    public void foreachSeen(int row, int col, GridConsumer consumer) {
+        foreachCellInRow(row, consumer);
+        foreachCellInColumn(col, consumer);
+        foreachCellInTile(row, col, (y, x) -> {
+            if (y != row && x != col) {
+                consumer.accept(y, x);
+            }
+        });
+    }
+
+
+    @FunctionalInterface
+    public interface GridConsumer {
+        void accept(int row, int col);
+    }
+
+    @FunctionalInterface
+    public interface CellConsumer {
+        void accept(int row, int col, SudokuCell cell);
+    }
+
+    private GridConsumer gridConsumer(CellConsumer consumer) {
+        return (y, x) -> consumer.accept(y, x, getCell(y, x));
+    }
+
+    public static Stream<SudokuCell> asStream(Consumer<CellConsumer> looper) {
+        Stream.Builder<SudokuCell> cells = Stream.builder();
+        looper.accept((y, x, c) -> cells.accept(c));
+        return cells.build();
     }
 
 

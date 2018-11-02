@@ -5,11 +5,10 @@ import sudoku.model.SudokuGrid;
 import sudoku.solvers.SudokuMove;
 import sudoku.solvers.SudokuSolver;
 
-import java.util.Objects;
-import java.util.Set;
+import java.util.BitSet;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toSet;
+import static java.util.Optional.ofNullable;
 
 public class SimpleSudokuSolver implements SudokuSolver {
 
@@ -31,6 +30,10 @@ public class SimpleSudokuSolver implements SudokuSolver {
                 continue;
             }
 
+            if (markObliged(grid, plan)) {
+                continue;
+            }
+
             break;
         }
 
@@ -47,9 +50,10 @@ public class SimpleSudokuSolver implements SudokuSolver {
     protected void notePotential(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
         grid.forEach((row, col) -> cell -> {
             if (cell.isEmpty()) {
-                Set<Integer> seen = grid.getSeen(row, col).map(SudokuCell::get).filter(Objects::nonNull).collect(toSet());
+                BitSet seen = new BitSet();
+                grid.foreachSeen(row, col, (y, x, c) -> ofNullable(c.get()).ifPresent(seen::set));
                 grid.forPossibleValues(v -> {
-                    if (!seen.contains(v)) {
+                    if (!seen.get(v)) {
                         plan.accept(expressPotential(row, col, v));
                         cell.makeNote(v);
                     }
@@ -75,6 +79,34 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
         return hasChanged[0];
     }
+
+    protected boolean markObliged(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
+        grid.forPossibleValues(v -> {
+//            // foreach tile
+//            for (int y=0; y<tileSize; y++) {
+//                for (int x=0; x<tileSize; x++) {
+//                    grid.getTile(y*tileSize, x*tileSize)
+//                            .filter(SudokuCell::isEmpty)
+//                            .filter(c -> c.hasNote(v))
+//                            .reduce((a,b) -> null)
+//                            .ifPresent(c -> mark(c, v));
+//                }
+//            }
+            for (int row = 0; row < grid.getHeight(); row++) {
+                int[] eligable = {0};
+                grid.foreachCellInRow(row, (y, x, c) -> {
+                    if (c.isEmpty() && c.hasNote(v)) {
+                        eligable[0]++;
+                    }
+                });
+
+                if (eligable[0] == 1) {
+                    mark(grid, plan, eligable);
+                }
+            }
+        });
+    }
+
 
     private void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, Integer row, Integer col, SudokuCell cell, int v) {
         cell.set(v);
