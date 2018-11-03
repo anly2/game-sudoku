@@ -46,6 +46,11 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
     public class SudokuCell extends NotableCell implements GridCell {
         @Getter
         private int row, column;
+
+        @Override
+        public String toString() {
+            return String.format("(At row=%d, col=%d, %s)", row, column, super.toString());
+        }
     }
 
     @Override

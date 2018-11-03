@@ -11,6 +11,7 @@ import java.util.BitSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,6 +20,7 @@ import static sudoku.utils.StreamExtensions.findExactlyOne;
 import static sudoku.utils.StreamExtensions.iterate;
 
 public class SimpleSudokuSolver implements SudokuSolver {
+    private static Logger log = Logger.getLogger("sudoku.solvers.SimpleSudokuSolver");
 
 
     @Override
@@ -83,6 +85,8 @@ public class SimpleSudokuSolver implements SudokuSolver {
                 if (cell.notesSize() == 1) {
                     int v = cell.getNotes().findFirst()
                             .orElseThrow(() -> new IllegalStateException("Notes size lied"));
+
+                    log.info("Found a cell noted solely " + v + ": " + cell);
                     mark(grid, plan, cell, v);
                     hasChanged[0] = true;
                 }
@@ -105,6 +109,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
             for (Stream<SudokuCell> domain : iterate(domains)) {
                 Optional<SudokuCell> obliged = findObliged(v, domain);
                 if (obliged.isPresent()) {
+                    log.info("Found a cell obliged to " + v + ": " + obliged.get());
                     mark(grid, plan, obliged.get(), v);
                     return true;
                 }
@@ -129,6 +134,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
                 Optional<Integer> lineY = findExactlyOne(cells.stream().map(GridCell::getRow).distinct());
                 if (lineY.isPresent()) {
+                    log.info("Found a Horizontal line at row " + lineY.get());
                     grid.getRow(lineY.get())
                             .filter(c -> c.isEmpty() && c.hasNote(v))
                             .filter(c -> !cells.contains(c))
@@ -138,6 +144,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
                 Optional<Integer> lineX = findExactlyOne(cells.stream().map(GridCell::getColumn).distinct());
                 if (lineX.isPresent()) {
+                    log.info("Found a Horizontal line at row " + lineX.get());
                     grid.getColumn(lineX.get())
                             .filter(c -> c.isEmpty() && c.hasNote(v))
                             .filter(c -> !cells.contains(c))
@@ -163,14 +170,17 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
 
     protected SudokuMove expressMarking(GridCell cell, Integer value) {
+        log.info("Marking cell: " + cell);
         return new SudokuMove(cell.getRow(), cell.getRow(), value, false);
     }
 
     protected SudokuMove expressPotential(GridCell cell, Integer value) {
+        log.info("Noting potential for " + value + " in cell: " + cell);
         return new SudokuMove(cell.getRow(), cell.getColumn(), value, true);
     }
 
     protected SudokuMove expressImpossibility(GridCell cell, Integer value) {
+        log.info("Erasing note for " + value + " from cell: " + cell);
         return new SudokuMove(cell.getRow(), cell.getColumn(), -value, true);
     }
 

@@ -3,6 +3,8 @@ package sudoku.model;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
+import static java.util.stream.Collectors.joining;
+
 public class NotableCell {
 
     /* Properties */
@@ -64,5 +66,16 @@ public class NotableCell {
 
     public IntStream getNotes() {
         return notes.stream();
+    }
+
+
+    /* General */
+
+    @Override
+    public String toString() {
+        return String.format("[Cell marked=[%s] (notes: %s)]",
+                value == null ? " " : value,
+                notes.stream().mapToObj(String::valueOf).collect(joining(", "))
+        );
     }
 }
