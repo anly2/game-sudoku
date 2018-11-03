@@ -10,9 +10,11 @@ import sudoku.solvers.SudokuSolver;
 import java.util.BitSet;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.toSet;
 import static sudoku.utils.StreamExtensions.findExactlyOne;
 import static sudoku.utils.StreamExtensions.iterate;
 
@@ -23,6 +25,12 @@ public class SimpleSudokuSolver implements SudokuSolver {
     public SudokuGrid solve(SudokuGrid grid) {
         apply(grid, playthrough(grid));
         return grid;
+    }
+
+    protected void apply(SudokuGrid grid, Stream<SudokuMove> playthrough) {
+        playthrough
+                .filter(m -> !m.isNote())
+                .forEach(m -> grid.getCell(m.getRow(), m.getColumn()).set(m.getValue()));
     }
 
     @Override
@@ -40,16 +48,14 @@ public class SimpleSudokuSolver implements SudokuSolver {
                 continue;
             }
 
+            if (markLines(grid, plan)) {
+                continue;
+            }
+
             break;
         }
 
         return plan.build();
-    }
-
-    protected void apply(SudokuGrid grid, Stream<SudokuMove> playthrough) {
-        playthrough
-                .filter(m -> !m.isNote())
-                .forEach(m -> grid.getCell(m.getRow(), m.getColumn()).set(m.getValue()));
     }
 
 
@@ -111,8 +117,40 @@ public class SimpleSudokuSolver implements SudokuSolver {
         return findExactlyOne(cells.filter(c -> c.isEmpty() && c.hasNote(value)));
     }
 
+    protected boolean markLines(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
+        for (int v : grid.possibleValues()) {
+            for (Stream<SudokuCell> tile : iterate(grid.tiles())) {
+                Set<SudokuCell> cells = tile.filter(c -> c.isEmpty() && c.hasNote(v))
+                        .limit(4).collect(toSet());
 
-    private void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, SudokuCell cell, int v) {
+                if (cells.size() < 2 || cells.size() > 3) {
+                    continue;
+                }
+
+                Optional<Integer> lineY = findExactlyOne(cells.stream().map(GridCell::getRow).distinct());
+                if (lineY.isPresent()) {
+                    grid.getRow(lineY.get())
+                            .filter(c -> c.isEmpty() && c.hasNote(v))
+                            .filter(c -> !cells.contains(c))
+                            .forEach(c -> plan.accept(expressImpossibility(c, v)));
+                    return true;
+                }
+
+                Optional<Integer> lineX = findExactlyOne(cells.stream().map(GridCell::getColumn).distinct());
+                if (lineX.isPresent()) {
+                    grid.getColumn(lineX.get())
+                            .filter(c -> c.isEmpty() && c.hasNote(v))
+                            .filter(c -> !cells.contains(c))
+                            .forEach(c -> plan.accept(expressImpossibility(c, v)));
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+
+    protected void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, SudokuCell cell, int v) {
         cell.set(v);
         plan.accept(expressMarking(cell, v));
         grid.getSeen(cell.getRow(), cell.getColumn())
@@ -176,102 +214,6 @@ public class SimpleSudokuSolver implements SudokuSolver {
     }
 
 
-    public boolean markLoners() {
-        boolean hasChanged = false;
-
-        for (int n = 0; n < 9; n++) {
-            Cells reg = this.grid.getReg(n);
-
-            for (int v = 1; v <= 9; v++) {
-                Cells marked = reg.getMarked(v);
-
-                if (marked.size() != 1)
-                    continue;
-
-                Cell cell = marked.get(0);
-                mark(cell, v);
-                express.loner(cell, v);
-                hasChanged = true;
-            }
-        }
-
-        return hasChanged;
-    }
-
-    public boolean markLines() {
-        boolean hasChanged = false;
-
-        for (int n = 0; n < 9; n++) {
-            Cells reg = this.grid.getReg(n);
-
-            for (int v = 1; v <= 9; v++) {
-                Cells marked = reg.getMarked(v);
-
-                if (marked.size() < 2)
-                    continue;
-
-
-                //Look for horizontal lines
-                boolean hasHLine = true;
-                int row = -1;
-
-                for (Cell m : marked) {
-                    CellPosition pos = m.getParent().find(m);
-
-                    if (row == -1) {
-                        row = pos.row();
-                        continue;
-                    }
-
-                    if (row == pos.row())
-                        continue;
-
-                    hasHLine = false;
-                    break;
-                }
-
-
-                //Look for horizontal lines
-                boolean hasVLine = true;
-                int col = -1;
-
-                for (Cell m : marked) {
-                    CellPosition pos = m.getParent().find(m);
-
-                    if (col == -1) {
-                        col = pos.col();
-                        continue;
-                    }
-
-                    if (col == pos.col())
-                        continue;
-
-                    hasVLine = false;
-                    break;
-                }
-
-
-                //Handle the line
-                if (hasHLine || hasVLine) {
-                    Cells affected = ((hasHLine) ? this.grid.getRow(row) : this.grid.getCol(col));
-                    affected.remove(marked);
-
-                    Cells changed = new Cells();
-
-                    for (Cell cell : affected)
-                        if (cell.clearNote(v))
-                            changed.add(cell);
-
-                    if (changed.size() > 0) {
-                        express.line(marked, v, changed);
-                        hasChanged = true;
-                        continue;
-                    }
-                }
-            }
-        }
-        return hasChanged;
-    }
 
 
     ArrayList<GridSave> trials = new ArrayList<GridSave>();
