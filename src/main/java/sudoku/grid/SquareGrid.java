@@ -1,5 +1,7 @@
 package sudoku.grid;
 
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 
@@ -65,5 +67,11 @@ public class SquareGrid<ELEM> implements Grid<ELEM> {
                 action.apply(row, col).accept((ELEM) cells[getIndex(row, col)]);
             }
         }
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public Iterator<ELEM> iterator() {
+        return (Iterator<ELEM>) Arrays.stream(cells).iterator();
     }
 }

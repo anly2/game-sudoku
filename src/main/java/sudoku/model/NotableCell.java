@@ -3,7 +3,7 @@ package sudoku.model;
 import java.util.BitSet;
 import java.util.stream.IntStream;
 
-public class SudokuCell {
+public class NotableCell {
 
     /* Properties */
 
@@ -13,11 +13,15 @@ public class SudokuCell {
 
     /* Construtors */
 
-    public SudokuCell(Integer value) {
+    public NotableCell() {
+        this(null);
+    }
+
+    public NotableCell(Integer value) {
         this(value, 9);
     }
 
-    public SudokuCell(Integer value, int size) {
+    public NotableCell(Integer value, int size) {
 //        assert value <= 0 && value > size: "Value (" + value + ") is not valid for the given Sudoku Grid size";
 
         this.value = value;

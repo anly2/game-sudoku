@@ -1,11 +1,17 @@
 package sudoku.model;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import sudoku.grid.GridCell;
 import sudoku.grid.SquareGrid;
 
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
+import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -13,7 +19,8 @@ import static java.lang.Math.sqrt;
 import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.toList;
 
-public class SudokuGrid extends SquareGrid<SudokuCell> {
+public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
+    @Getter
     private int tileSize;
 
     public SudokuGrid() {
@@ -32,17 +39,30 @@ public class SudokuGrid extends SquareGrid<SudokuCell> {
 
         for (int row = 0; row < size; row++) {
             for (int col = 0; col < size; col++) {
-                setCell(row, col, new SudokuCell(null, size));
+                super.setCell(row, col, new SudokuCell(row, col));
             }
         }
     }
 
 
-    public void forPossibleValues(Consumer<Integer> consumer) {
-        IntStream.rangeClosed(1, getWidth()).boxed().forEach(consumer);
+    @AllArgsConstructor(access = AccessLevel.PRIVATE)
+    public class SudokuCell extends NotableCell implements GridCell {
+        @Getter
+        private int row, column;
     }
 
-    public void foreachTile(GridConsumer consumer) {
+    @Override
+    public SudokuCell setCell(int row, int column, SudokuCell element) {
+        throw new UnsupportedOperationException("The Sudoku Grid should be immutable. " +
+                "Mutate individual cells if necessary.");
+    }
+
+
+    public void forPossibleValues(IntConsumer consumer) {
+        IntStream.rangeClosed(1, getWidth()).forEach(consumer);
+    }
+
+    public void foreachTile(BiConsumer<Integer, Integer> consumer) {
         for (int row = 0; row < tileSize; row++) {
             for (int col = 0; col < tileSize; col++) {
                 consumer.accept(row * tileSize, col * tileSize);
@@ -50,77 +70,37 @@ public class SudokuGrid extends SquareGrid<SudokuCell> {
         }
     }
 
-    public void foreachCellInTile(int y, int x, CellConsumer consumer) {
-        foreachCellInTile(y, x, gridConsumer(consumer));
-    }
-
-    public void foreachCellInTile(int y, int x, GridConsumer consumer) {
+    public Stream<SudokuCell> getTile(int y, int x) {
         int i = Math.floorDiv(y, tileSize);
         int j = Math.floorDiv(x, tileSize);
 
+        Stream.Builder<SudokuCell> tile = Stream.builder();
         for (int row = 0; row < tileSize; row++) {
             for (int col = 0; col < tileSize; col++) {
-                consumer.accept(i + row, j + col);
+                tile.accept(getCell(i + row, j + col));
             }
         }
+        return tile.build();
     }
 
 
-    public void foreachCellInRow(int row, CellConsumer consumer) {
-        foreachCellInRow(row, gridConsumer(consumer));
+    public Stream<SudokuCell> getRow(int row) {
+        return IntStream.range(0, getWidth())
+                .mapToObj(col -> getCell(row, col));
     }
 
-    public void foreachCellInRow(int row, GridConsumer consumer) {
-        for (int col = 0; col < getWidth(); col++) {
-            consumer.accept(row, col);
-        }
+    public Stream<SudokuCell> getColumn(int column) {
+        return IntStream.range(0, getHeight())
+                .mapToObj(row -> getCell(row, column));
     }
 
-
-    public void foreachCellInColumn(int col, CellConsumer consumer) {
-        foreachCellInColumn(col, gridConsumer(consumer));
-    }
-
-    public void foreachCellInColumn(int col, GridConsumer consumer) {
-        for (int row = 0; row < getHeight(); row++) {
-            consumer.accept(row, col);
-        }
-    }
-
-
-    public void foreachSeen(int row, int col, CellConsumer consumer) {
-        foreachSeen(row, col, gridConsumer(consumer));
-    }
-
-    public void foreachSeen(int row, int col, GridConsumer consumer) {
-        foreachCellInRow(row, consumer);
-        foreachCellInColumn(col, consumer);
-        foreachCellInTile(row, col, (y, x) -> {
-            if (y != row && x != col) {
-                consumer.accept(y, x);
-            }
-        });
-    }
-
-
-    @FunctionalInterface
-    public interface GridConsumer {
-        void accept(int row, int col);
-    }
-
-    @FunctionalInterface
-    public interface CellConsumer {
-        void accept(int row, int col, SudokuCell cell);
-    }
-
-    private GridConsumer gridConsumer(CellConsumer consumer) {
-        return (y, x) -> consumer.accept(y, x, getCell(y, x));
-    }
-
-    public static Stream<SudokuCell> asStream(Consumer<CellConsumer> looper) {
-        Stream.Builder<SudokuCell> cells = Stream.builder();
-        looper.accept((y, x, c) -> cells.accept(c));
-        return cells.build();
+    public Stream<SudokuCell> getSeen(int row, int column) {
+        return Stream.of(
+                getRow(row),
+                getColumn(column),
+                getTile(row, column)
+                        .filter(cell -> cell.getRow() != row && cell.getColumn() != column))
+                .flatMap(Function.identity());
     }
 
 

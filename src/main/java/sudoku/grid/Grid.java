@@ -1,6 +1,6 @@
 package sudoku.grid;
 
-public interface Grid<ELEM> {
+public interface Grid<ELEM> extends Iterable<ELEM> {
     int getWidth();
 
     int getHeight();
