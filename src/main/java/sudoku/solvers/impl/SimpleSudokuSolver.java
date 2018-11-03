@@ -1,14 +1,20 @@
 package sudoku.solvers.impl;
 
-import sudoku.model.SudokuCell;
+import sudoku.grid.GridCell;
+import sudoku.model.NotableCell;
 import sudoku.model.SudokuGrid;
+import sudoku.model.SudokuGrid.SudokuCell;
 import sudoku.solvers.SudokuMove;
 import sudoku.solvers.SudokuSolver;
 
 import java.util.BitSet;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
+import static sudoku.utils.StreamExtensions.findExactlyOne;
+import static sudoku.utils.StreamExtensions.iterate;
 
 public class SimpleSudokuSolver implements SudokuSolver {
 
@@ -26,7 +32,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
         notePotential(grid, plan);
 
         while (true) {
-            if (markHoles(grid, plan)) {
+            if (markLoners(grid, plan)) {
                 continue;
             }
 
@@ -51,10 +57,10 @@ public class SimpleSudokuSolver implements SudokuSolver {
         grid.forEach((row, col) -> cell -> {
             if (cell.isEmpty()) {
                 BitSet seen = new BitSet();
-                grid.foreachSeen(row, col, (y, x, c) -> ofNullable(c.get()).ifPresent(seen::set));
-                grid.forPossibleValues(v -> {
+                grid.getSeen(row, col).map(NotableCell::get).filter(Objects::nonNull).forEach(seen::set);
+                grid.possibleValues().forEach(v -> {
                     if (!seen.get(v)) {
-                        plan.accept(expressPotential(row, col, v));
+                        plan.accept(expressPotential(cell, v));
                         cell.makeNote(v);
                     }
                 });
@@ -63,7 +69,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
     }
 
 
-    protected boolean markHoles(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
+    protected boolean markLoners(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
         boolean[] hasChanged = {false};
 
         grid.forEach((y, x) -> cell -> {
@@ -71,7 +77,7 @@ public class SimpleSudokuSolver implements SudokuSolver {
                 if (cell.notesSize() == 1) {
                     int v = cell.getNotes().findFirst()
                             .orElseThrow(() -> new IllegalStateException("Notes size lied"));
-                    mark(grid, plan, y, x, cell, v);
+                    mark(grid, plan, cell, v);
                     hasChanged[0] = true;
                 }
             }
@@ -81,55 +87,53 @@ public class SimpleSudokuSolver implements SudokuSolver {
     }
 
     protected boolean markObliged(SudokuGrid grid, Stream.Builder<SudokuMove> plan) {
-        grid.forPossibleValues(v -> {
-//            // foreach tile
-//            for (int y=0; y<tileSize; y++) {
-//                for (int x=0; x<tileSize; x++) {
-//                    grid.getTile(y*tileSize, x*tileSize)
-//                            .filter(SudokuCell::isEmpty)
-//                            .filter(c -> c.hasNote(v))
-//                            .reduce((a,b) -> null)
-//                            .ifPresent(c -> mark(c, v));
-//                }
-//            }
-            for (int row = 0; row < grid.getHeight(); row++) {
-                int[] eligable = {0};
-                grid.foreachCellInRow(row, (y, x, c) -> {
-                    if (c.isEmpty() && c.hasNote(v)) {
-                        eligable[0]++;
-                    }
-                });
+        for (int v : grid.possibleValues()) {
+            Stream<Stream<SudokuCell>> domains = Stream.concat(Stream.concat(
+                    IntStream.range(0, grid.getHeight())
+                            .mapToObj(grid::getRow),
+                    IntStream.range(0, grid.getWidth())
+                            .mapToObj(grid::getColumn)),
+                    grid.tiles()
+            );
 
-                if (eligable[0] == 1) {
-                    mark(grid, plan, eligable);
+            for (Stream<SudokuCell> domain : iterate(domains)) {
+                Optional<SudokuCell> obliged = findObliged(v, domain);
+                if (obliged.isPresent()) {
+                    mark(grid, plan, obliged.get(), v);
+                    return true;
                 }
             }
-        });
+        }
+        return false;
+    }
+
+    private Optional<SudokuCell> findObliged(int value, Stream<SudokuCell> cells) {
+        return findExactlyOne(cells.filter(c -> c.isEmpty() && c.hasNote(value)));
     }
 
 
-    private void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, Integer row, Integer col, SudokuCell cell, int v) {
+    private void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, SudokuCell cell, int v) {
         cell.set(v);
-        plan.accept(expressMarking(row, col, v));
-        grid.getSeen(row, col)
+        plan.accept(expressMarking(cell, v));
+        grid.getSeen(cell.getRow(), cell.getColumn())
                 .filter(c -> c.hasNote(v))
                 .forEach(c -> {
                     c.clearNote(v);
-                    plan.accept(expressImpossibility(row, col, v));
+                    plan.accept(expressImpossibility(c, v));
                 });
     }
 
 
-    protected SudokuMove expressMarking(Integer row, Integer col, Integer value) {
-        return new SudokuMove(row, col, value, false);
+    protected SudokuMove expressMarking(GridCell cell, Integer value) {
+        return new SudokuMove(cell.getRow(), cell.getRow(), value, false);
     }
 
-    protected SudokuMove expressPotential(Integer row, Integer col, Integer value) {
-        return new SudokuMove(row, col, value, true);
+    protected SudokuMove expressPotential(GridCell cell, Integer value) {
+        return new SudokuMove(cell.getRow(), cell.getColumn(), value, true);
     }
 
-    protected SudokuMove expressImpossibility(Integer row, Integer col, Integer value) {
-        return new SudokuMove(row, col, -value, true);
+    protected SudokuMove expressImpossibility(GridCell cell, Integer value) {
+        return new SudokuMove(cell.getRow(), cell.getColumn(), -value, true);
     }
 
 

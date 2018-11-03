@@ -9,9 +9,6 @@ import sudoku.grid.SquareGrid;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.BiConsumer;
-import java.util.function.Function;
-import java.util.function.IntConsumer;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -58,16 +55,18 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
     }
 
 
-    public void forPossibleValues(IntConsumer consumer) {
-        IntStream.rangeClosed(1, getWidth()).forEach(consumer);
+    public Iterable<Integer> possibleValues() {
+        return () -> IntStream.rangeClosed(1, getWidth()).iterator();
     }
 
-    public void foreachTile(BiConsumer<Integer, Integer> consumer) {
+    public Stream<Stream<SudokuCell>> tiles() {
+        Stream.Builder<Stream<SudokuCell>> tiles = Stream.builder();
         for (int row = 0; row < tileSize; row++) {
             for (int col = 0; col < tileSize; col++) {
-                consumer.accept(row * tileSize, col * tileSize);
+                tiles.accept(getTile(row * tileSize, col * tileSize));
             }
         }
+        return tiles.build();
     }
 
     public Stream<SudokuCell> getTile(int y, int x) {
@@ -95,12 +94,11 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
     }
 
     public Stream<SudokuCell> getSeen(int row, int column) {
-        return Stream.of(
-                getRow(row),
-                getColumn(column),
+        return Stream.concat(
+                Stream.concat(getRow(row), getColumn(column)),
                 getTile(row, column)
-                        .filter(cell -> cell.getRow() != row && cell.getColumn() != column))
-                .flatMap(Function.identity());
+                        .filter(cell -> cell.getRow() != row && cell.getColumn() != column)
+        );
     }
 
 
