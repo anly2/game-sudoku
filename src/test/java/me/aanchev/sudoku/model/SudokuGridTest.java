@@ -84,11 +84,13 @@ public class SudokuGridTest {
     public void printGrid() {
         int size = 3 * 3;
         SudokuGrid grid = SudokuGrid.sudokuGrid(IntStream.range(0, size * size).boxed().collect(Collectors.toList()));
+        System.out.println(asString(grid));
+    }
 
-        Integer[][] result = new Integer[size][size];
+    public static String asString(SudokuGrid grid) {
+        Integer[][] result = new Integer[grid.getHeight()][grid.getWidth()];
         grid.forEach((y, x) -> c -> result[y][x] = c.get());
-
-        System.out.println(asString(result));
+        return asString(result);
     }
 
     public static String asString(Integer[][] grid) {

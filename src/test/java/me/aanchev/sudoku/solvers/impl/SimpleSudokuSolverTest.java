@@ -2,43 +2,87 @@ package me.aanchev.sudoku.solvers.impl;
 
 import me.aanchev.sudoku.model.SudokuGrid;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoints;
+import org.junit.experimental.theories.FromDataPoints;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 
+import java.util.List;
+
+import static java.util.Arrays.asList;
+import static me.aanchev.sudoku.model.SudokuGridTest.asString;
 import static me.aanchev.sudoku.solvers.utils.SolverTestUtils.assertGridIsComplete;
 
+@RunWith(Theories.class)
 public class SimpleSudokuSolverTest {
+
+    @DataPoints("sudokuGrids")
+    public static List<String> sudokuGrids = asList(
+            String.join("\n",
+                    "",
+                    "   39  1 ",
+                    "5 1    4 ",
+                    "9  7  5  ",
+                    "6 253  7 ",
+                    "    7   8",
+                    "7  8  9 3",
+                    "8 3 1  9 ",
+                    " 9 2 6  7",
+                    "4    3 61"
+            ),
+            String.join("\n",
+                    "",
+                    "1    97  ",
+                    " 9     2 ",
+                    "  786  5 ",
+                    " 1  7   5",
+                    "   5 2   ",
+                    "5   9  6 ",
+                    " 2  534  ",
+                    " 3     7 ",
+                    "  86    2"
+            ),
+            String.join("\n",
+                    "",
+                    " 593  7  ",
+                    " 1  5    ",
+                    " 7  816  ",
+                    "4  7  3  ",
+                    "  7   8  ",
+                    "  3  5  4",
+                    "  817  6 ",
+                    "    9  3 ",
+                    "  6  849 "
+            )
+    );
+
     @Test
-    public void testSampleSudokuGame() {
-        SudokuGrid grid = SudokuGrid.sudokuGrid(String.join("\n",
-                "",
-                "   39  1 ",
-                "5 1    4 ",
-                "9  7  5  ",
-                "6 253  7 ",
-                "    7   8",
-                "7  8  9 3",
-                "8 3 1  9 ",
-                " 9 2 6  7",
-                "4    3 61"
-        ));
+    @Theory
+    public void testSampleSudokuGame(@FromDataPoints("sudokuGrids") String inputGrid) {
+        SudokuGrid grid = SudokuGrid.sudokuGrid(inputGrid);
 
         new SimpleSudokuSolver().solve(grid);
 
         assertGridIsComplete(grid);
-
-//        Integer[][] result = new Integer[9][9];
-//        grid.forEach((y, x) -> c -> result[y][x] = c.get());
-//
-//        assertThat(asString(result)).isEqualTo(asString(new Integer[][]{
-//                {2, 3, 8, 3, 9, 5, 7, 1, 6},
-//                {5, 7, 1, 6, 2, 8, 3, 4, 9},
-//                {9, 3, 6, 7, 4, 1, 5, 8, 2},
-//                {6, 8, 2, 5, 3, 9, 1, 7, 4},
-//                {3, 5, 9, 1, 7, 4, 6, 2, 8},
-//                {7, 1, 4, 8, 6, 2, 9, 5, 3},
-//                {8, 6, 3, 4, 1, 7, 2, 9, 5},
-//                {1, 9, 5, 2, 8, 6, 4, 3, 7},
-//                {4, 2, 7, 9, 5, 3, 8, 6, 1}
-//        }));
     }
 
+    @Test
+    public void exp() {
+        SudokuGrid grid = SudokuGrid.sudokuGrid(String.join("\n",
+                "",
+                " 593  7  ",
+                " 1  5    ",
+                " 7  816  ",
+                "4  7  3  ",
+                "  7   8  ",
+                "  3  5  4",
+                "  817  6 ",
+                "    9  3 ",
+                "  6  849 "
+        ));
+
+        new SimpleSudokuSolver().solve(grid);
+        System.out.println(asString(grid));
+    }
 }
