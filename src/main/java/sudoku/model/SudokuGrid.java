@@ -75,8 +75,8 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
     }
 
     public Stream<SudokuCell> getTile(int y, int x) {
-        int i = Math.floorDiv(y, tileSize);
-        int j = Math.floorDiv(x, tileSize);
+        int i = Math.floorDiv(y, tileSize) * tileSize;
+        int j = Math.floorDiv(x, tileSize) * tileSize;
 
         Stream.Builder<SudokuCell> tile = Stream.builder();
         for (int row = 0; row < tileSize; row++) {
@@ -100,7 +100,9 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
 
     public Stream<SudokuCell> getSeen(int row, int column) {
         return Stream.concat(
-                Stream.concat(getRow(row), getColumn(column)),
+                Stream.concat(
+                        getRow(row).filter(c -> c.getColumn() != column),
+                        getColumn(column).filter(c -> c.getRow() != row)),
                 getTile(row, column)
                         .filter(cell -> cell.getRow() != row && cell.getColumn() != column)
         );
