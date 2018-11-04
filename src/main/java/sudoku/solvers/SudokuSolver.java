@@ -5,7 +5,7 @@ import sudoku.model.SudokuGrid;
 import java.util.stream.Stream;
 
 public interface SudokuSolver {
-    SudokuGrid solve(SudokuGrid grid);
+    void solve(SudokuGrid grid);
 
-    Stream<SudokuMove> playthrough(SudokuGrid grid);
+    Stream<SudokuMove> play(SudokuGrid grid);
 }

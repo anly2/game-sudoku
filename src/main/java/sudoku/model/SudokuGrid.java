@@ -51,6 +51,13 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
         public String toString() {
             return String.format("(%d at row=%d, col=%d, %s)", getIndex(row, column), row, column, super.toString());
         }
+
+        @Override
+        public void set(Integer value) {
+            assert get() == null: "Not allowed to overwrite penned numbers!" +
+                    " (Cannot write " + value + " over " + get() + ")";
+            super.set(value);
+        }
     }
 
     @Override

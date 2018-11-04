@@ -24,19 +24,12 @@ public class SimpleSudokuSolver implements SudokuSolver {
 
 
     @Override
-    public SudokuGrid solve(SudokuGrid grid) {
-        apply(grid, playthrough(grid));
-        return grid;
-    }
-
-    protected void apply(SudokuGrid grid, Stream<SudokuMove> playthrough) {
-        playthrough
-                .filter(m -> !m.isNote())
-                .forEach(m -> grid.getCell(m.getRow(), m.getColumn()).set(m.getValue()));
+    public void solve(SudokuGrid grid) {
+        play(grid);
     }
 
     @Override
-    public Stream<SudokuMove> playthrough(SudokuGrid grid) {
+    public Stream<SudokuMove> play(SudokuGrid grid) {
         Stream.Builder<SudokuMove> plan = Stream.builder();
 
         notePotential(grid, plan);
@@ -132,29 +125,39 @@ public class SimpleSudokuSolver implements SudokuSolver {
                     continue;
                 }
 
-                Optional<Integer> lineY = findExactlyOne(cells.stream().map(GridCell::getRow).distinct());
-                if (lineY.isPresent()) {
-                    log.info("Found a Horizontal line at row " + lineY.get());
-                    grid.getRow(lineY.get())
-                            .filter(c -> c.isEmpty() && c.hasNote(v))
-                            .filter(c -> !cells.contains(c))
-                            .forEach(c -> plan.accept(expressImpossibility(c, v)));
+                boolean somethingChanged;
+
+                // Horizontal lines
+                somethingChanged = findExactlyOne(cells.stream().map(GridCell::getRow).distinct())
+                        .map(grid::getRow)
+                        .map(affected -> affected
+                                .filter(c -> c.isEmpty() && c.hasNote(v) && !cells.contains(c))
+                                .peek(c -> plan.accept(expressImpossibility(c, v)))
+                                .count())
+                        .map(changedCount -> changedCount > 0)
+                        .orElse(false);
+
+                if (somethingChanged) {
                     return true;
                 }
 
-                Optional<Integer> lineX = findExactlyOne(cells.stream().map(GridCell::getColumn).distinct());
-                if (lineX.isPresent()) {
-                    log.info("Found a Horizontal line at row " + lineX.get());
-                    grid.getColumn(lineX.get())
-                            .filter(c -> c.isEmpty() && c.hasNote(v))
-                            .filter(c -> !cells.contains(c))
-                            .forEach(c -> plan.accept(expressImpossibility(c, v)));
+                // Vertical lines
+                somethingChanged = findExactlyOne(cells.stream().map(GridCell::getColumn).distinct())
+                        .map(grid::getColumn)
+                        .map(affected -> affected
+                                .filter(c -> c.isEmpty() && c.hasNote(v) && !cells.contains(c))
+                                .peek(c -> plan.accept(expressImpossibility(c, v)))
+                                .count())
+                        .map(changedCount -> changedCount > 0)
+                        .orElse(false);
+
+                if (somethingChanged) {
                     return true;
                 }
             }
         }
         return false;
-    }
+}
 
 
     protected void mark(SudokuGrid grid, Stream.Builder<SudokuMove> plan, SudokuCell cell, int v) {
