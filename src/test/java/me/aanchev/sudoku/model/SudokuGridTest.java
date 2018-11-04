@@ -80,12 +80,6 @@ public class SudokuGridTest {
 
     }
 
-    //    @Test
-    public void printGrid() {
-        int size = 3 * 3;
-        SudokuGrid grid = SudokuGrid.sudokuGrid(IntStream.range(0, size * size).boxed().collect(Collectors.toList()));
-        System.out.println(asString(grid));
-    }
 
     public static String asString(SudokuGrid grid) {
         Integer[][] result = new Integer[grid.getHeight()][grid.getWidth()];

@@ -11,7 +11,6 @@ import org.junit.runner.RunWith;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static me.aanchev.sudoku.model.SudokuGridTest.asString;
 import static me.aanchev.sudoku.solvers.utils.SolverTestUtils.assertGridIsComplete;
 
 @RunWith(Theories.class)
@@ -67,22 +66,4 @@ public class SimpleSudokuSolverTest {
         assertGridIsComplete(grid);
     }
 
-    @Test
-    public void exp() {
-        SudokuGrid grid = SudokuGrid.sudokuGrid(String.join("\n",
-                "",
-                " 593  7  ",
-                " 1  5    ",
-                " 7  816  ",
-                "4  7  3  ",
-                "  7   8  ",
-                "  3  5  4",
-                "  817  6 ",
-                "    9  3 ",
-                "  6  849 "
-        ));
-
-        new SimpleSudokuSolver().solve(grid);
-        System.out.println(asString(grid));
-    }
 }
