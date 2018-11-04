@@ -132,7 +132,10 @@ public class SimpleSudokuSolver implements SudokuSolver {
                         .map(grid::getRow)
                         .map(affected -> affected
                                 .filter(c -> c.isEmpty() && c.hasNote(v) && !cells.contains(c))
-                                .peek(c -> plan.accept(expressImpossibility(c, v)))
+                                .peek(c -> {
+                                    c.clearNote(v);
+                                    plan.accept(expressImpossibility(c, v));
+                                })
                                 .count())
                         .map(changedCount -> changedCount > 0)
                         .orElse(false);
@@ -146,7 +149,10 @@ public class SimpleSudokuSolver implements SudokuSolver {
                         .map(grid::getColumn)
                         .map(affected -> affected
                                 .filter(c -> c.isEmpty() && c.hasNote(v) && !cells.contains(c))
-                                .peek(c -> plan.accept(expressImpossibility(c, v)))
+                                .peek(c -> {
+                                    c.clearNote(v);
+                                    plan.accept(expressImpossibility(c, v));
+                                })
                                 .count())
                         .map(changedCount -> changedCount > 0)
                         .orElse(false);
