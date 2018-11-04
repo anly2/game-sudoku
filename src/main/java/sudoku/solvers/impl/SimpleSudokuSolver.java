@@ -1,5 +1,6 @@
 package sudoku.solvers.impl;
 
+import lombok.extern.slf4j.Slf4j;
 import sudoku.grid.GridCell;
 import sudoku.model.NotableCell;
 import sudoku.model.SudokuGrid;
@@ -11,7 +12,6 @@ import java.util.BitSet;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.logging.Logger;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -19,9 +19,8 @@ import static java.util.stream.Collectors.toSet;
 import static sudoku.utils.StreamExtensions.findExactlyOne;
 import static sudoku.utils.StreamExtensions.iterate;
 
+@Slf4j
 public class SimpleSudokuSolver implements SudokuSolver {
-    private static Logger log = Logger.getLogger("sudoku.solvers.SimpleSudokuSolver");
-
 
     @Override
     public void solve(SudokuGrid grid) {
