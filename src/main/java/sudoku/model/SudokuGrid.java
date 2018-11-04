@@ -49,7 +49,7 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
 
         @Override
         public String toString() {
-            return String.format("(At row=%d, col=%d, %s)", row, column, super.toString());
+            return String.format("(%d at row=%d, col=%d, %s)", getIndex(row, column), row, column, super.toString());
         }
     }
 
