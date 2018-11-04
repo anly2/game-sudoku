@@ -1,12 +1,12 @@
-package sudoku.solvers.impl;
+package me.aanchev.sudoku.solvers.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import sudoku.grid.GridCell;
-import sudoku.model.NotableCell;
-import sudoku.model.SudokuGrid;
-import sudoku.model.SudokuGrid.SudokuCell;
-import sudoku.solvers.SudokuMove;
-import sudoku.solvers.SudokuSolver;
+import me.aanchev.sudoku.grid.GridCell;
+import me.aanchev.sudoku.model.NotableCell;
+import me.aanchev.sudoku.model.SudokuGrid;
+import me.aanchev.sudoku.model.SudokuGrid.SudokuCell;
+import me.aanchev.sudoku.solvers.SudokuMove;
+import me.aanchev.sudoku.solvers.SudokuSolver;
 
 import java.util.BitSet;
 import java.util.Objects;
@@ -16,8 +16,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
-import static sudoku.utils.StreamExtensions.findExactlyOne;
-import static sudoku.utils.StreamExtensions.iterate;
+import static me.aanchev.sudoku.utils.StreamExtensions.findExactlyOne;
+import static me.aanchev.sudoku.utils.StreamExtensions.iterate;
 
 @Slf4j
 public class SimpleSudokuSolver implements SudokuSolver {

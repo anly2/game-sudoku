@@ -1,4 +1,4 @@
-package sudoku.grid;
+package me.aanchev.sudoku.grid;
 
 public interface GridCell {
     int getRow();

@@ -1,4 +1,4 @@
-package sudoku.model;
+package me.aanchev.sudoku.model;
 
 import java.util.BitSet;
 import java.util.stream.IntStream;

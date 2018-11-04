@@ -1,10 +1,10 @@
-package sudoku.model;
+package me.aanchev.sudoku.model;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import sudoku.grid.GridCell;
-import sudoku.grid.SquareGrid;
+import me.aanchev.sudoku.grid.GridCell;
+import me.aanchev.sudoku.grid.SquareGrid;
 
 import java.util.Arrays;
 import java.util.Iterator;

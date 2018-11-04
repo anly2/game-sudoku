@@ -1,6 +1,6 @@
-package sudoku.solvers;
+package me.aanchev.sudoku.solvers;
 
-import sudoku.model.SudokuGrid;
+import me.aanchev.sudoku.model.SudokuGrid;
 
 import java.util.stream.Stream;
 

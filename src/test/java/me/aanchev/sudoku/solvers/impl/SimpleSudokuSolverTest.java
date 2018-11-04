@@ -1,9 +1,9 @@
-package sudoku.solvers.impl;
+package me.aanchev.sudoku.solvers.impl;
 
+import me.aanchev.sudoku.model.SudokuGrid;
 import org.junit.Test;
-import sudoku.model.SudokuGrid;
 
-import static sudoku.solvers.utils.SolverTestUtils.assertGridIsComplete;
+import static me.aanchev.sudoku.solvers.utils.SolverTestUtils.assertGridIsComplete;
 
 public class SimpleSudokuSolverTest {
     @Test

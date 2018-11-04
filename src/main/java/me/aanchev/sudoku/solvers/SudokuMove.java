@@ -1,4 +1,4 @@
-package sudoku.solvers;
+package me.aanchev.sudoku.solvers;
 
 import lombok.*;
 

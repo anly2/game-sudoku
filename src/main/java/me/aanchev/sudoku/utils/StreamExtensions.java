@@ -1,4 +1,4 @@
-package sudoku.utils;
+package me.aanchev.sudoku.utils;
 
 import java.util.Optional;
 import java.util.stream.Stream;

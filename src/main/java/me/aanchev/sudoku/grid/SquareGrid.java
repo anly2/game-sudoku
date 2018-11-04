@@ -1,4 +1,4 @@
-package sudoku.grid;
+package me.aanchev.sudoku.grid;
 
 import java.util.Arrays;
 import java.util.Iterator;

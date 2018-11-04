@@ -1,4 +1,4 @@
-package sudoku.grid;
+package me.aanchev.sudoku.grid;
 
 public interface Grid<ELEM> extends Iterable<ELEM> {
     int getWidth();

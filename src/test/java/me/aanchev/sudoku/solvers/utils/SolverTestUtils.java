@@ -1,7 +1,7 @@
-package sudoku.solvers.utils;
+package me.aanchev.sudoku.solvers.utils;
 
-import sudoku.model.NotableCell;
-import sudoku.model.SudokuGrid;
+import me.aanchev.sudoku.model.NotableCell;
+import me.aanchev.sudoku.model.SudokuGrid;
 
 import java.util.ArrayList;
 import java.util.List;
