@@ -112,7 +112,7 @@ public class SudokuGrid extends SquareGrid<SudokuGrid.SudokuCell> {
     /* Static initializers */
 
     public static SudokuGrid sudokuGrid(String data) {
-        return sudokuGrid(data.split("[^\\d \t]*"));
+        return sudokuGrid(data.replace("\n", "").split(data.contains(",") ? "," : ""));
     }
 
     public static SudokuGrid sudokuGrid(String... values) {

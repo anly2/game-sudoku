@@ -13,6 +13,36 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class SudokuGridTest {
 
     @Test
+    public void staticConstructor_withDataString_works() {
+        SudokuGrid grid = SudokuGrid.sudokuGrid(String.join("\n", "",
+                "   39  1 ",
+                "5 1    4 ",
+                "9  7  5  ",
+                "6 253  7 ",
+                "    7   8",
+                "7  8  9 3",
+                "8 3 1  9 ",
+                " 9 2 6  7",
+                "4    3 61"
+        ));
+
+        Integer[][] result = new Integer[grid.getHeight()][grid.getWidth()];
+        grid.forEach((y, x) -> c -> result[y][x] = c.get());
+
+        assertThat(asString(result)).isEqualTo(asString(new Integer[][]{
+                {null, null, null, 3, 9, null, null, 1, null},
+                {5, null, 1, null, null, null, null, 4, null},
+                {9, null, null, 7, null, null, 5, null, null},
+                {6, null, 2, 5, 3, null, null, 7, null},
+                {null, null, null, null, 7, null, null, null, 8},
+                {7, null, null, 8, null, null, 9, null, 3},
+                {8, null, 3, null, 1, null, null, 9, null},
+                {null, 9, null, 2, null, 6, null, null, 7},
+                {4, null, null, null, null, 3, null, 6, 1}
+        }));
+    }
+
+    @Test
     public void getTile_works() {
         int size = 3 * 3;
         SudokuGrid grid = SudokuGrid.sudokuGrid(IntStream.range(0, size * size).boxed().collect(Collectors.toList()));
