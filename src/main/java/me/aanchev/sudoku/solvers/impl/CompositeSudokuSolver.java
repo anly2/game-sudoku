@@ -26,7 +26,10 @@ public class CompositeSudokuSolver implements SudokuSolver {
 
     @Override
     public void solve(SudokuGrid grid) {
-        play(grid);
+        long performedMoves = play(grid).count();
+        if (performedMoves == 0) {
+            throw new IllegalStateException("Failed to solve the sudoku");
+        }
     }
 
     @Override
