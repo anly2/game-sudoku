@@ -6,9 +6,11 @@ import me.aanchev.sudoku.model.SudokuGrid;
 import me.aanchev.sudoku.solvers.SudokuMove;
 import me.aanchev.sudoku.solvers.SudokuSolver;
 
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static java.util.Comparator.comparing;
@@ -29,43 +31,38 @@ public class CompositeSudokuSolver implements SudokuSolver {
 
     @Override
     public Stream<SudokuMove> play(SudokuGrid grid) {
-        Tactic[] bestTactic = {null};
+        @SuppressWarnings("unchecked")
+        Supplier<Stream<SudokuMove>>[] bestTactic = new Supplier[]{null};
         return Stream.iterate(
                 Stream.ofNullable((SudokuMove) null),
                 moves -> {
                     bestTactic[0] = tactics.stream()
-                            .map(t -> entry(t, t.estimateAppropriateness(grid)))
-                            .filter(e -> e.getValue() > 0)
-                            .max(comparing(Map.Entry::getValue))
-                            .map(Map.Entry::getKey)
+                            .map(t -> t.apply(grid))
+                            .filter(e -> e.getKey() > 0)
+                            .max(comparing(Entry::getKey))
+                            .map(Entry::getValue)
                             .orElse(null);
                     return bestTactic[0] != null;
                 },
-                moves -> bestTactic[0].play(grid)
+                moves -> bestTactic[0].get()
         ).flatMap(s -> s);
     }
 
+    @FunctionalInterface
     public interface Tactic {
-        int estimateAppropriateness(SudokuGrid grid);
+        /**
+         * Give an estimate of the appropriateness of this tactic, and a callback to execute it.
+         *
+         * @param grid the sudoku grid for which to estimate and potentially perform
+         * @return a pair of an estimate of appropriateness, and a callback to execute the tactic.
+         */
+        Entry<Integer, Supplier<Stream<SudokuMove>>> apply(SudokuGrid grid);
 
-        Stream<SudokuMove> play(SudokuGrid grid);
 
-
-        static Tactic tryFirstTactic(Function<SudokuGrid, List<SudokuMove>> tactic) {
-            return new Tactic() {
-                private List<SudokuMove> moves;
-
-                @Override
-                public int estimateAppropriateness(SudokuGrid grid) {
-                    this.moves = tactic.apply(grid);
-                    return moves.size();
-                }
-
-                @Override
-                public Stream<SudokuMove> play(SudokuGrid grid) {
-                    //not thread-safe (is grid the same as the one estimateAppr was called with?)
-                    return moves.stream();
-                }
+        static Tactic eagerTactic(Function<SudokuGrid, ? extends Collection<SudokuMove>> tactic) {
+            return grid -> {
+                Collection<SudokuMove> moves = tactic.apply(grid);
+                return entry(moves.size(), moves::stream);
             };
         }
     }
