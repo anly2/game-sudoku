@@ -11,4 +11,12 @@
     </parent>
     <artifactId>sudoku-reader</artifactId>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.openimaj</groupId>
+            <artifactId>image-processing</artifactId>
+            <version>LATEST</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
 </project>
