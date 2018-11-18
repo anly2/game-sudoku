@@ -23,11 +23,6 @@ import static me.aanchev.sudoku.utils.StreamUtils.iterate;
 public class SimpleSudokuSolver implements SudokuSolver {
 
     @Override
-    public void solve(SudokuGrid grid) {
-        play(grid);
-    }
-
-    @Override
     public Stream<SudokuMove> play(SudokuGrid grid) {
         Stream.Builder<SudokuMove> plan = Stream.builder();
 

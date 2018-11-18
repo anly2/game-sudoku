@@ -7,7 +7,7 @@ import me.aanchev.sudoku.model.NotableCell;
 import me.aanchev.sudoku.model.SudokuGrid;
 import me.aanchev.sudoku.solvers.SudokuMove;
 import me.aanchev.sudoku.solvers.SudokuSolver;
-import me.aanchev.sudoku.solvers.impl.CompositeSudokuSolver;
+import me.aanchev.sudoku.solvers.modular.CompositeSudokuSolver;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -17,7 +17,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static me.aanchev.sudoku.solvers.impl.CompositeSudokuSolver.Tactic.eagerTactic;
+import static me.aanchev.sudoku.solvers.modular.Tactic.eagerTactic;
 import static me.aanchev.sudoku.utils.StreamUtils.findExactlyOne;
 import static me.aanchev.sudoku.utils.StreamUtils.iterate;
 
