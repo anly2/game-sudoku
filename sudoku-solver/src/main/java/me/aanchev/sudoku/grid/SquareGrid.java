@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 public class SquareGrid<ELEM> implements Grid<ELEM> {
 
@@ -69,9 +70,14 @@ public class SquareGrid<ELEM> implements Grid<ELEM> {
         }
     }
 
-    @Override
+
     @SuppressWarnings("unchecked")
+    public Stream<ELEM> stream() {
+        return (Stream<ELEM>) Arrays.stream(cells);
+    }
+
+    @Override
     public Iterator<ELEM> iterator() {
-        return (Iterator<ELEM>) Arrays.stream(cells).iterator();
+        return stream().iterator();
     }
 }
