@@ -16,8 +16,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
-import static me.aanchev.sudoku.utils.StreamExtensions.findExactlyOne;
-import static me.aanchev.sudoku.utils.StreamExtensions.iterate;
+import static me.aanchev.sudoku.utils.StreamUtils.findExactlyOne;
+import static me.aanchev.sudoku.utils.StreamUtils.iterate;
 
 @Slf4j
 public class SimpleSudokuSolver implements SudokuSolver {

@@ -17,8 +17,8 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static me.aanchev.sudoku.solvers.impl.CompositeSudokuSolver.Tactic.eagerTactic;
-import static me.aanchev.sudoku.utils.StreamExtensions.findExactlyOne;
-import static me.aanchev.sudoku.utils.StreamExtensions.iterate;
+import static me.aanchev.sudoku.utils.StreamUtils.findExactlyOne;
+import static me.aanchev.sudoku.utils.StreamUtils.iterate;
 
 @Slf4j
 public class ModularSimpleSudokuSolver {
