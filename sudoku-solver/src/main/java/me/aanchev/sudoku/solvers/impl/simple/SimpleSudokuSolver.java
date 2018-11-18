@@ -1,4 +1,4 @@
-package me.aanchev.sudoku.solvers.impl;
+package me.aanchev.sudoku.solvers.impl.simple;
 
 import lombok.extern.slf4j.Slf4j;
 import me.aanchev.sudoku.grid.GridCell;

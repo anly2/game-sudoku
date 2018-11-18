@@ -1,4 +1,4 @@
-package me.aanchev.sudoku.solvers.impl;
+package me.aanchev.sudoku.solvers.impl.simple;
 
 import lombok.experimental.Delegate;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +7,7 @@ import me.aanchev.sudoku.model.NotableCell;
 import me.aanchev.sudoku.model.SudokuGrid;
 import me.aanchev.sudoku.solvers.SudokuMove;
 import me.aanchev.sudoku.solvers.SudokuSolver;
+import me.aanchev.sudoku.solvers.impl.CompositeSudokuSolver;
 
 import java.util.*;
 import java.util.stream.IntStream;
@@ -21,7 +22,7 @@ import static me.aanchev.sudoku.utils.StreamUtils.findExactlyOne;
 import static me.aanchev.sudoku.utils.StreamUtils.iterate;
 
 @Slf4j
-public class ModularSimpleSudokuSolver {
+public class ModularSimpleSudokuSolver implements SudokuSolver {
     @Delegate
     private SudokuSolver base;
 
